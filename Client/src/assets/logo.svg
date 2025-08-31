@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="80" viewBox="0 0 250 80">
+  <!-- Chain Icon -->
+  <g transform="translate(10,10)">
+    <rect x="0" y="10" width="40" height="20" rx="10" ry="10" fill="none" stroke="#007BFF" stroke-width="6"></rect>
+    <rect x="20" y="10" width="40" height="20" rx="10" ry="10" fill="none" stroke="#007BFF" stroke-width="6"></rect>
+  </g>
+
+  <!-- Text -->
+  <text x="90" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold" fill="black">
+    LinkUp
+  </text>
+</svg>
