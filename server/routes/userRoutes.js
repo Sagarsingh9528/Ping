@@ -58,6 +58,9 @@ userRouter.get("/followingList", clerkAuth, followingList);
 userRouter.get("/search", clerkAuth, search);
 userRouter.get("/getAllNotifications", clerkAuth, getAllNotifications);
 userRouter.post("/markAsRead", clerkAuth, markAsRead);
-userRouter.post("/editProfile", clerkAuth, upload.single("profile_picture"), editProfile);
-
+userRouter.post("/editProfile", clerkAuth, upload.single("profile_picture"), async (req, res) => {
+  console.log("editProfile route hit"); // ✅ ye check karo
+  console.log(req.body);
+  res.json({ message: "Route working", body: req.body });
+});
 export default userRouter;

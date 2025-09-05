@@ -2,77 +2,74 @@ import User from "../models/userModel.js";
 import Notification from "../models/notificationModel.js";
 import uploadOnCloudinary from "../configs/cloudinary.js";
 
-
+// -------------------- GET CURRENT USER --------------------
 export const getCurrentUser = async (req, res) => {
   try {
-    const { userId } = await req.auth(); 
+    const { userId } = await req.auth();
     const user = await User.findOne({ clerkId: userId }).populate(
       "posts loops posts.author posts.comments story following"
     );
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
     return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
+// -------------------- SUGGESTED USERS --------------------
 export const suggestedUsers = async (req, res) => {
   try {
-    const { userId } = await req.auth(); 
-    const users = await User.find({
-      clerkId: { $ne: userId },
-    }).select("-password");
-
-    return res.status(200).json(users);
+    const { userId } = await req.auth();
+    const usersList = await User.find({ clerkId: { $ne: userId } }).select("-password");
+    return res.status(200).json(usersList);
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
+// -------------------- EDIT PROFILE --------------------
 export const editProfile = async (req, res) => {
   try {
-    const { userId } = await req.auth(); 
+    const { userId } = await req.auth();
     const { full_name, username, bio, location, cover_photo } = req.body;
 
     const user = await User.findOne({ clerkId: userId }).select("-password");
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // Remove extra quotes if present
+    const sanitize = (str) => str?.replace(/^"|"$/g, "");
+    const cleanFullName = sanitize(full_name);
+    const cleanUsername = sanitize(username);
+    const cleanBio = sanitize(bio);
+    const cleanLocation = sanitize(location);
+
+    // Check if username exists for another user
+    if (cleanUsername && cleanUsername !== user.username) {
+      const existingUser = await User.findOne({ username: cleanUsername }).select("-password");
+      if (existingUser) return res.status(400).json({ message: "Username already exists" });
     }
 
-    
-    if (username && username !== user.username) {
-      const sameUserWithUserName = await User.findOne({ username }).select("-password");
-      if (sameUserWithUserName) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-    }
-
-    
+    // Handle profile picture upload
     if (req.file) {
       const profileImage = await uploadOnCloudinary(req.file.path);
       user.profileImage = profileImage;
     }
 
-    
-    user.full_name = full_name || user.full_name;
-    user.username = username || user.username;
-    user.bio = bio || user.bio;
-    user.location = location || user.location;
+    // Update user fields
+    user.full_name = cleanFullName || user.full_name;
+    user.username = cleanUsername || user.username;
+    user.bio = cleanBio || user.bio;
+    user.location = cleanLocation || user.location;
     user.cover_photo = cover_photo || user.cover_photo;
 
     await user.save();
-
     return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ message: `Edit profile error: ${error.message}` });
   }
 };
 
-
+// -------------------- GET PROFILE --------------------
 export const getProfile = async (req, res) => {
   try {
     const userName = req.params.username;
@@ -80,19 +77,17 @@ export const getProfile = async (req, res) => {
       .select("-password")
       .populate("posts loops following followers");
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
     return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ message: `Get profile error: ${error.message}` });
   }
 };
 
-
+// -------------------- FOLLOW / UNFOLLOW --------------------
 export const follow = async (req, res) => {
   try {
-    const { userId: currentUserId } = await req.auth(); 
+    const { userId: currentUserId } = await req.auth();
     const targetUserId = req.params.targetUserId;
 
     if (!targetUserId) return res.status(400).json({ message: "Target user not found" });
@@ -100,7 +95,6 @@ export const follow = async (req, res) => {
 
     const currentUser = await User.findOne({ clerkId: currentUserId });
     const targetUser = await User.findById(targetUserId);
-
     if (!currentUser || !targetUser) return res.status(404).json({ message: "User not found" });
 
     const isFollowing = currentUser.following.includes(targetUser._id);
@@ -109,18 +103,16 @@ export const follow = async (req, res) => {
       // Unfollow
       currentUser.following = currentUser.following.filter(id => id.toString() !== targetUserId);
       targetUser.followers = targetUser.followers.filter(id => id.toString() !== currentUser._id.toString());
-
       await currentUser.save();
       await targetUser.save();
-
       return res.status(200).json({ following: false, message: "Unfollowed successfully" });
     } else {
       // Follow
       currentUser.following.push(targetUser._id);
       targetUser.followers.push(currentUser._id);
 
-      // Optional notification logic
-      const notification = await Notification.create({
+      // Optional notification
+      await Notification.create({
         sender: currentUser._id,
         receiver: targetUser._id,
         type: "follow",
@@ -129,7 +121,6 @@ export const follow = async (req, res) => {
 
       await currentUser.save();
       await targetUser.save();
-
       return res.status(200).json({ following: true, message: "Followed successfully" });
     }
   } catch (error) {
@@ -137,10 +128,10 @@ export const follow = async (req, res) => {
   }
 };
 
-
+// -------------------- FOLLOWING LIST --------------------
 export const followingList = async (req, res) => {
   try {
-    const { userId } = await req.auth(); 
+    const { userId } = await req.auth();
     const user = await User.findOne({ clerkId: userId });
     return res.status(200).json(user?.following || []);
   } catch (error) {
@@ -148,29 +139,29 @@ export const followingList = async (req, res) => {
   }
 };
 
-
+// -------------------- SEARCH USERS --------------------
 export const search = async (req, res) => {
   try {
     const keyWord = req.query.keyWord;
     if (!keyWord) return res.status(400).json({ message: "Keyword is required" });
 
-    const users = await User.find({
+    const usersList = await User.find({
       $or: [
         { username: { $regex: keyWord, $options: "i" } },
         { full_name: { $regex: keyWord, $options: "i" } },
       ],
     }).select("-password");
 
-    return res.status(200).json(users);
+    return res.status(200).json(usersList);
   } catch (error) {
     return res.status(500).json({ message: `Search error: ${error.message}` });
   }
 };
 
-
+// -------------------- GET ALL NOTIFICATIONS --------------------
 export const getAllNotifications = async (req, res) => {
   try {
-    const { userId } = await req.auth(); 
+    const { userId } = await req.auth();
     const notifications = await Notification.find({ receiver: userId })
       .populate("sender receiver post loop")
       .sort({ createdAt: -1 });
@@ -181,10 +172,10 @@ export const getAllNotifications = async (req, res) => {
   }
 };
 
-
+// -------------------- MARK AS READ --------------------
 export const markAsRead = async (req, res) => {
   try {
-    const { userId } = await req.auth(); 
+    const { userId } = await req.auth();
     const { notificationId } = req.body;
 
     if (!notificationId) return res.status(400).json({ message: "Notification ID required" });
