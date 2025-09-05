@@ -22,13 +22,13 @@ function App() {
       if (!user) return
 
       try {
-        const token = await getToken()  // 👈 Clerk se JWT token
+        const token = await getToken() 
         console.log("Clerk Token:", token)
 
         const res = await fetch("http://localhost:8080/api/user/me", {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${token}`, // 👈 Token backend me bhejna
+            "Authorization": `Bearer ${token}`, 
           },
         })
 
