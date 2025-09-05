@@ -12,6 +12,8 @@ function CreatePost() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+
+    
     setImages((prev) => [...prev, ...files]);
   };
 
