@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const { Schema } = mongoose;  // ✅ Schema extract
+const { Schema } = mongoose;  
 
 const conversationSchema = new Schema(
   {

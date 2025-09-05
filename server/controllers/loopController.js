@@ -15,10 +15,10 @@ export const uploadLoop = async (req, res) => {
     const loop = await Loop.create({
       caption,
       media,
-      author: req.auth.userId, // create loop in DB
+      author: req.auth.userId, 
     });
     const user = await User.findById(req.userId);
-    user.loops.push(loop._id); // add loop id to user’s loops array
+    user.loops.push(loop._id); 
     await user.save();
 
      const populatedLoop=await Loop.findById(loop._id)
@@ -38,9 +38,9 @@ export const like = async (req, res) => {
         }
         const alreadyLiked=loop.likes.some(id=>id.toString()==req.userId.toString())
           if(alreadyLiked){
-        loop.likes=loop.likes.filter(id=>id.toString()!=req.userId.toString()) // unlike
+        loop.likes=loop.likes.filter(id=>id.toString()!=req.userId.toString()) 
     }else{
-        loop.likes.push(req.userId)  // like
+        loop.likes.push(req.userId)  
 
         if (loop.author._id != req.userId) {
             await Notification.create({
@@ -85,7 +85,7 @@ export const comment=async (req,res)=>{
 
     await loop.save()
     await loop.populate("author","name userName profileImage")
-    await loop.populate("comments.author")   // also get comment author details
+    await loop.populate("comments.author")   
 
     return res.status(200).json(loop)
   } catch (error) {

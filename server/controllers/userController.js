@@ -2,10 +2,10 @@ import User from "../models/userModel.js";
 import Notification from "../models/notificationModel.js";
 import uploadOnCloudinary from "../configs/cloudinary.js";
 
-// -------------------- GET CURRENT USER --------------------
+
 export const getCurrentUser = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ Clerk user ID
+    const { userId } = await req.auth(); 
     const user = await User.findOne({ clerkId: userId }).populate(
       "posts loops posts.author posts.comments story following"
     );
@@ -18,10 +18,10 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
-// -------------------- SUGGESTED USERS --------------------
+
 export const suggestedUsers = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ Clerk
+    const { userId } = await req.auth(); 
     const users = await User.find({
       clerkId: { $ne: userId },
     }).select("-password");
@@ -32,10 +32,10 @@ export const suggestedUsers = async (req, res) => {
   }
 };
 
-// -------------------- EDIT PROFILE --------------------
+
 export const editProfile = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ Clerk
+    const { userId } = await req.auth(); 
     const { full_name, username, bio, location, cover_photo } = req.body;
 
     const user = await User.findOne({ clerkId: userId }).select("-password");
@@ -43,7 +43,7 @@ export const editProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Check username uniqueness
+    
     if (username && username !== user.username) {
       const sameUserWithUserName = await User.findOne({ username }).select("-password");
       if (sameUserWithUserName) {
@@ -51,13 +51,13 @@ export const editProfile = async (req, res) => {
       }
     }
 
-    // Upload profile picture if exists
+    
     if (req.file) {
       const profileImage = await uploadOnCloudinary(req.file.path);
       user.profileImage = profileImage;
     }
 
-    // Update fields
+    
     user.full_name = full_name || user.full_name;
     user.username = username || user.username;
     user.bio = bio || user.bio;
@@ -72,7 +72,7 @@ export const editProfile = async (req, res) => {
   }
 };
 
-// -------------------- GET PROFILE --------------------
+
 export const getProfile = async (req, res) => {
   try {
     const userName = req.params.username;
@@ -89,10 +89,10 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// -------------------- FOLLOW / UNFOLLOW --------------------
+
 export const follow = async (req, res) => {
   try {
-    const { userId: currentUserId } = await req.auth(); // ✅ Clerk
+    const { userId: currentUserId } = await req.auth(); 
     const targetUserId = req.params.targetUserId;
 
     if (!targetUserId) return res.status(400).json({ message: "Target user not found" });
@@ -137,10 +137,10 @@ export const follow = async (req, res) => {
   }
 };
 
-// -------------------- FOLLOWING LIST --------------------
+
 export const followingList = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ Clerk
+    const { userId } = await req.auth(); 
     const user = await User.findOne({ clerkId: userId });
     return res.status(200).json(user?.following || []);
   } catch (error) {
@@ -148,7 +148,7 @@ export const followingList = async (req, res) => {
   }
 };
 
-// -------------------- SEARCH USER --------------------
+
 export const search = async (req, res) => {
   try {
     const keyWord = req.query.keyWord;
@@ -167,10 +167,10 @@ export const search = async (req, res) => {
   }
 };
 
-// -------------------- GET ALL NOTIFICATIONS --------------------
+
 export const getAllNotifications = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ Clerk
+    const { userId } = await req.auth(); 
     const notifications = await Notification.find({ receiver: userId })
       .populate("sender receiver post loop")
       .sort({ createdAt: -1 });
@@ -181,10 +181,10 @@ export const getAllNotifications = async (req, res) => {
   }
 };
 
-// -------------------- MARK NOTIFICATION AS READ --------------------
+
 export const markAsRead = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ Clerk
+    const { userId } = await req.auth(); 
     const { notificationId } = req.body;
 
     if (!notificationId) return res.status(400).json({ message: "Notification ID required" });

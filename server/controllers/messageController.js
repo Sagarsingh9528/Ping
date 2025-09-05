@@ -1,12 +1,12 @@
 import uploadOnCloudinary from "../configs/cloudinary.js";
 import Message from "../models/messageModel.js";
 import User from "../models/userModel.js";
-import Conversation from "../models/conversationalModal.js"; // ✅ Capitalize model
+import Conversation from "../models/conversationalModal.js"; 
 
-// -------------------- SEND MESSAGE --------------------
+
 export const sendMessage = async (req, res) => {
   try {
-    const { userId: senderId } = await req.auth(); // ✅ Clerk se userId
+    const { userId: senderId } = await req.auth(); 
     const receiverId = req.params.receiverId;
     const { message } = req.body;
 
@@ -42,10 +42,10 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-// -------------------- GET ALL MESSAGES --------------------
+
 export const getAllMessages = async (req, res) => {
   try {
-    const { userId: senderId } = await req.auth(); // ✅ Fix
+    const { userId: senderId } = await req.auth(); 
     const receiverId = req.params.receiverId;
 
     const conversation = await Conversation.findOne({
@@ -58,10 +58,10 @@ export const getAllMessages = async (req, res) => {
   }
 };
 
-// -------------------- GET PREVIOUS USER CHATS --------------------
+
 export const getPrevUserChats = async (req, res) => {
   try {
-    const { userId: currentUserId } = await req.auth(); // ✅ Fix
+    const { userId: currentUserId } = await req.auth(); 
 
     const conversations = await Conversation.find({
       participants: currentUserId,

@@ -12,26 +12,26 @@ import {
   getProfile
 } from '../controllers/userController.js';
 import { upload } from '../configs/multer.js';
-import User from "../models/userModel.js"; // MongoDB User model
-import { users } from "@clerk/clerk-sdk-node"; // Clerk SDK
+import User from "../models/userModel.js"; 
+import { users } from "@clerk/clerk-sdk-node"; 
 
 const userRouter = express.Router();
 
-// -------------------- GET CURRENT USER --------------------
+
 userRouter.get("/me", clerkAuth, async (req, res) => {
   try {
-    const { userId } = await req.auth(); // Clerk ID
+    const { userId } = await req.auth(); 
 
-    // Try fetch user by clerkId first
+    
     let user = await User.findOne({ clerkId: userId }).select("-password");
 
     if (!user) {
-      // Extra safety: check by email if clerkId not found
+      
       const clerkUser = await users.getUser(userId);
       user = await User.findOne({ email: clerkUser.emailAddresses?.[0]?.emailAddress }).select("-password");
 
       if (!user) {
-        // If still not found, create new user
+        
         user = await User.create({
           clerkId: clerkUser.id,
           full_name: clerkUser.fullName || "Unnamed User",
@@ -49,7 +49,7 @@ userRouter.get("/me", clerkAuth, async (req, res) => {
 });
 
 
-// -------------------- OTHER ROUTES --------------------
+
 userRouter.get('/current', clerkAuth, getCurrentUser);
 userRouter.get('/suggested', clerkAuth, suggestedUsers);
 userRouter.get('/getProfile/:username', clerkAuth, getProfile);
