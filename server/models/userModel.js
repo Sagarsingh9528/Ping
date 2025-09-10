@@ -14,9 +14,6 @@ const userSchema = new mongoose.Schema(
     cover_photo: { type: String, default: "" },
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-    loops: [{ type: mongoose.Schema.Types.ObjectId, ref: "Loop" }],
-    story: { type: mongoose.Schema.Types.ObjectId, ref: "Story" },
     connections: [{ type: String, ref: "User" }],
   },
   { timestamps: true, minimize: false }

@@ -19,28 +19,11 @@ function App() {
   // ✅ Get user from backend
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      if (!user) return
-
-      try {
-        const token = await getToken() 
-        console.log("Clerk Token:", token)
-
-        const res = await fetch("http://localhost:8080/api/user/me", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`, 
-          },
-        })
-
-        const data = await res.json()
-        console.log("Backend User Response:", data)
-      } catch (err) {
-        console.error("Fetch user error:", err)
-      }
+    
     }
 
     fetchCurrentUser()
-  }, [user, getToken])
+  }, [])
 
   return (
     <>
