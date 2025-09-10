@@ -1,7 +1,7 @@
 import { Inngest } from "inngest";
 import User from "../models/userModel.js";
 
-// Create a client to send and receive events
+// Create Inngest client
 export const inngest = new Inngest({ id: "linkUp-app" });
 
 /**
@@ -11,29 +11,43 @@ const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
   async ({ event }) => {
-    const { id, first_name, last_name, email_addresses, image_url } = event.data;
+    const data = event.data;
 
-    let email = email_addresses?.[0]?.email_address || null;
-    let username = email ? email.split("@")[0] : `user_${Date.now()}`;
+    const _id = data.id;
+    const full_name = `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unnamed User";
+    const email = data.email_addresses?.[0]?.email_address || `${_id}@clerk.com`;
+    let username = data.username || (_id ? `user_${_id.slice(0, 8)}` : `user_${Date.now()}`);
+    const profile_picture = data.profile_image_url || "";
 
-    // check availability of username
-    let existingUser = await User.findOne({ username });
-    if (existingUser) {
+    // Ensure username uniqueness
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
       username = `${username}_${Math.floor(Math.random() * 10000)}`;
     }
 
     const userData = {
-      _id: id, // Clerk user id as primary key
+      _id,
+      full_name,
       email,
-      full_name: `${first_name || ""} ${last_name || ""}`.trim() || "Unnamed User",
-      profile_picture: image_url || "",
       username,
+      profile_picture,
+      bio: "Hey there! I am using LinkUp.",
+      location: "",
+      followers: [],
+      following: [],
+      connections: [],
     };
 
-    const newUser = new User(userData);
-    await newUser.save();
+    const existingUser = await User.findById(_id);
+    if (!existingUser) {
+      const newUser = new User(userData);
+      await newUser.save();
+      console.log("✅ User created:", full_name);
+      return { success: true, user: newUser };
+    }
 
-    return { success: true, message: "User created", user: newUser };
+    console.log("⚠️ User already exists:", full_name);
+    return { success: false, message: "User already exists" };
   }
 );
 
@@ -44,19 +58,24 @@ const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
   { event: "clerk/user.updated" },
   async ({ event }) => {
-    const { id, first_name, last_name, email_addresses, image_url } = event.data;
+    const data = event.data;
+
+    const _id = data.id;
+    const full_name = `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unnamed User";
+    const email = data.email_addresses?.[0]?.email_address || `${_id}@clerk.com`;
+    const username = data.username || (_id ? `user_${_id.slice(0, 8)}` : `user_${Date.now()}`);
+    const profile_picture = data.profile_image_url || "";
 
     const updatedUserData = {
-      email: email_addresses?.[0]?.email_address || null,
-      full_name: `${first_name || ""} ${last_name || ""}`.trim() || "Unnamed User",
-      profile_picture: image_url || "",
+      full_name,
+      email,
+      username,
+      profile_picture,
     };
 
-    const updatedUser = await User.findByIdAndUpdate(id, updatedUserData, {
-      new: true,
-    });
-
-    return { success: true, message: "User updated", user: updatedUser };
+    const updatedUser = await User.findByIdAndUpdate(_id, updatedUserData, { new: true });
+    console.log("✏️ User updated:", full_name);
+    return { success: true, user: updatedUser };
   }
 );
 
@@ -67,9 +86,10 @@ const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
-    const { id } = event.data;
-    await User.findByIdAndDelete(id);
-    return { success: true, message: `User ${id} deleted` };
+    const { id: _id } = event.data;
+    await User.findByIdAndDelete(_id);
+    console.log("🗑️ User deleted:", _id);
+    return { success: true, message: `User ${_id} deleted` };
   }
 );
 
