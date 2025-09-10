@@ -15,9 +15,9 @@ function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
         {/* Profile Picture */}
         <div className="w-32 h-32 border-4 border-white shadow-lg absolute -top-16 rounded-full overflow-hidden">
           <img
-            src={user.profile_picture}
+            src={user.profile_picture || "/default-avatar.png"} // ✅ only schema field + fallback
             className="w-full h-full object-cover rounded-full"
-            alt=""
+            alt="profile"
           />
         </div>
 
@@ -80,7 +80,7 @@ function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
                 onClick={() => setShowEdit(true)}
                 className="mt-4 md:mt-0 bg-white border px-4 py-2 rounded-xl shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-100 transition relative z-10 flex gap-1 cursor-pointer"
               >
-                <PenBox className="w-4 h-4"/>
+                <PenBox className="w-4 h-4" />
                 Edit
               </button>
             )}

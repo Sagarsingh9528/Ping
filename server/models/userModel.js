@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema(
   {
+    _id: {type: String, require: true},
     email: { type: String, unique: true, index: true },
     password: { type: String, select: false },
     full_name: { type: String, required: true },
@@ -18,7 +19,7 @@ const userSchema = new mongoose.Schema(
     story: { type: mongoose.Schema.Types.ObjectId, ref: "Story" },
     connections: [{ type: String, ref: "User" }],
   },
-  { timestamps: true }
+  { timestamps: true, minimize: false }
 );
 
 const User = mongoose.model("User", userSchema);
