@@ -13,41 +13,39 @@ const syncUserCreation = inngest.createFunction(
   async ({ event }) => {
     const data = event.data;
 
+    // Extract Clerk fields safely
     const _id = data.id;
-    const full_name = `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unnamed User";
-    const email = data.email_addresses?.[0]?.email_address || `${_id}@clerk.com`;
-    let username = data.username || (_id ? `user_${_id.slice(0, 8)}` : `user_${Date.now()}`);
+    const first_name = data.first_name || "";
+    const last_name = data.last_name || "";
+    const email =
+      data.email_addresses?.[0]?.email_address || `${_id}@clerk.com`;
+    const username =
+      data.username ||
+      (email ? email.split("@")[0] : `user_${_id.slice(0, 8)}`);
     const profile_picture = data.profile_image_url || "";
 
-    // Ensure username uniqueness
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      username = `${username}_${Math.floor(Math.random() * 10000)}`;
+    // Ensure unique username
+    let finalUsername = username;
+    const existingUser = await User.findOne({ username: finalUsername });
+    if (existingUser) {
+      finalUsername = `${finalUsername}_${Math.floor(Math.random() * 10000)}`;
     }
 
     const userData = {
       _id,
-      full_name,
       email,
-      username,
+      full_name: `${first_name} ${last_name}`.trim() || "Unnamed User",
+      username: finalUsername,
       profile_picture,
-      bio: "Hey there! I am using LinkUp.",
-      location: "",
-      followers: [],
-      following: [],
-      connections: [],
     };
 
-    const existingUser = await User.findById(_id);
-    if (!existingUser) {
-      const newUser = new User(userData);
-      await newUser.save();
-      console.log("✅ User created:", full_name);
-      return { success: true, user: newUser };
-    }
+    console.log("Creating user in MongoDB:", userData);
 
-    console.log("⚠️ User already exists:", full_name);
-    return { success: false, message: "User already exists" };
+    // Save user
+    const newUser = new User(userData);
+    await newUser.save();
+
+    return { success: true, message: "User created", user: newUser };
   }
 );
 
@@ -60,22 +58,22 @@ const syncUserUpdation = inngest.createFunction(
   async ({ event }) => {
     const data = event.data;
 
-    const _id = data.id;
-    const full_name = `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unnamed User";
-    const email = data.email_addresses?.[0]?.email_address || `${_id}@clerk.com`;
-    const username = data.username || (_id ? `user_${_id.slice(0, 8)}` : `user_${Date.now()}`);
-    const profile_picture = data.profile_image_url || "";
-
     const updatedUserData = {
-      full_name,
-      email,
-      username,
-      profile_picture,
+      email:
+        data.email_addresses?.[0]?.email_address ||
+        `${data.id}@clerk.com`,
+      full_name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unnamed User",
+      username: data.username || undefined, // optional: only update if present
+      profile_picture: data.profile_image_url || "",
     };
 
-    const updatedUser = await User.findByIdAndUpdate(_id, updatedUserData, { new: true });
-    console.log("✏️ User updated:", full_name);
-    return { success: true, user: updatedUser };
+    console.log("Updating user in MongoDB:", updatedUserData);
+
+    const updatedUser = await User.findByIdAndUpdate(data.id, updatedUserData, {
+      new: true,
+    });
+
+    return { success: true, message: "User updated", user: updatedUser };
   }
 );
 
@@ -86,10 +84,10 @@ const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
-    const { id: _id } = event.data;
-    await User.findByIdAndDelete(_id);
-    console.log("🗑️ User deleted:", _id);
-    return { success: true, message: `User ${_id} deleted` };
+    const { id } = event.data;
+    await User.findByIdAndDelete(id);
+    console.log(`Deleted user: ${id}`);
+    return { success: true, message: `User ${id} deleted` };
   }
 );
 
