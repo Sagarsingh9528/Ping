@@ -13,16 +13,7 @@ await connectDB();
 // ✅ Middlewares
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173", // Vite dev
-      process.env.CLIENT_URL,  // Production frontend (set in .env)
-    ],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors());
 
 // ✅ Test route
 app.get("/", (req, res) => {
