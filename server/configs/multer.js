@@ -4,23 +4,19 @@ import fs from "fs";
 
 const isVercel = Boolean(process.env.VERCEL);
 
-// ✅ Writable path
+// Use /tmp in Vercel, else local uploads folder
 const uploadDir = isVercel
-  ? "/tmp/uploads"                           // 🔹 Vercel temp folder (allowed)
-  : path.join(process.cwd(), "uploads");      // 🔹 Local dev folder
+  ? "/tmp/uploads"
+  : path.join(process.cwd(), "uploads");
 
-// ✅ Sirf tab mkdir karo jab path /tmp ho ya local ho
+// Only try to mkdir for writable paths
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
 
 const fileFilter = (req, file, cb) => {
@@ -34,5 +30,5 @@ const fileFilter = (req, file, cb) => {
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
