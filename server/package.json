@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.23",
-    "@clerk/express": "^1.7.26",
+    "@clerk/express": "^1.7.30",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -25,6 +25,7 @@
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^7.0.6",
     "prettier": "^3.6.2"
   },
   "devDependencies": {

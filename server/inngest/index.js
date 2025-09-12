@@ -1,5 +1,11 @@
 import { Inngest } from "inngest";
+import mongoose from "mongoose"; // ✅ default import
 import User from "../models/userModel.js";
+import Connection from "../models/connection.js";
+import sendEmail from "../configs/nodeMailer.js";
+
+// You can use mongoose.connection anywhere you need DB connection info:
+// const { connection } = mongoose;
 
 // Create Inngest client
 export const inngest = new Inngest({ id: "linkUp-app" });
@@ -13,7 +19,6 @@ const syncUserCreation = inngest.createFunction(
   async ({ event }) => {
     const data = event.data;
 
-    // Extract Clerk fields safely
     const _id = data.id;
     const first_name = data.first_name || "";
     const last_name = data.last_name || "";
@@ -41,7 +46,6 @@ const syncUserCreation = inngest.createFunction(
 
     console.log("Creating user in MongoDB:", userData);
 
-    // Save user
     const newUser = new User(userData);
     await newUser.save();
 
@@ -60,18 +64,21 @@ const syncUserUpdation = inngest.createFunction(
 
     const updatedUserData = {
       email:
-        data.email_addresses?.[0]?.email_address ||
-        `${data.id}@clerk.com`,
-      full_name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unnamed User",
-      username: data.username || undefined, // optional: only update if present
+        data.email_addresses?.[0]?.email_address || `${data.id}@clerk.com`,
+      full_name:
+        `${data.first_name || ""} ${data.last_name || ""}`.trim() ||
+        "Unnamed User",
+      username: data.username || undefined,
       profile_picture: data.profile_image_url || "",
     };
 
     console.log("Updating user in MongoDB:", updatedUserData);
 
-    const updatedUser = await User.findByIdAndUpdate(data.id, updatedUserData, {
-      new: true,
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      data.id,
+      updatedUserData,
+      { new: true }
+    );
 
     return { success: true, message: "User updated", user: updatedUser };
   }
@@ -91,5 +98,73 @@ const syncUserDeletion = inngest.createFunction(
   }
 );
 
+/**
+ * Send reminder when a new connection request is added
+ */
+const sendNewConnectionRequestReminder = inngest.createFunction(
+  { id: "send-new-connection-request-reminder" },
+  { event: "app/connection-request" },
+  async ({ event, step }) => {
+    const { connectionId } = event.data;
+
+    await step.run("send-connection-request-mail", async () => {
+      const connDoc = await Connection.findById(connectionId).populate(
+        "from_user_id to_user_id"
+      );
+
+      const subject = `New connection Request`;
+      const body = `<div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Hi ${connDoc.to_user_id.full_name},</h2>
+        <p>You have a new connection request from ${connDoc.from_user_id.full_name} - ${connDoc.from_user_id.username}</p>
+        <p>Click <a href="${process.env.FRONTEND_URL}/connections" style="color: #10b981;">here</a> to accept or reject the request</p>
+        <br/>
+        <p>Thanks <br/>LinkUp - Stay Connected</p>
+      </div>`;
+
+      await sendEmail({
+        to: connDoc.to_user_id.email,
+        subject,
+        body,
+      });
+    });
+
+    const in24hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await step.sleepUntil("wait-for-24-hours", in24hours);
+
+    await step.run("send-connection-request-reminder", async () => {
+      const connDoc = await Connection.findById(connectionId).populate(
+        "from_user_id to_user_id"
+      );
+
+      if (connDoc.status === "accepted") {
+        return { message: "Already accepted" };
+      }
+
+      const subject = `New connection Request`;
+      const body = `<div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Hi ${connDoc.to_user_id.full_name},</h2>
+        <p>You have a new connection request from ${connDoc.from_user_id.full_name} - ${connDoc.from_user_id.username}</p>
+        <p>Click <a href="${process.env.FRONTEND_URL}/connections" style="color: #10b981;">here</a> to accept or reject the request</p>
+        <br/>
+        <p>Thanks <br/>LinkUp - Stay Connected</p>
+      </div>`;
+
+      await sendEmail({
+        to: connDoc.to_user_id.email,
+        subject,
+        body,
+      });
+
+      return { message: "Reminder sent" };
+    });
+  }
+);
+
 // Export all Inngest functions
-export const functions = [syncUserCreation, syncUserUpdation, syncUserDeletion];
+export const functions = [
+  syncUserCreation,
+  syncUserUpdation,
+  syncUserDeletion,
+  sendNewConnectionRequestReminder,
+];

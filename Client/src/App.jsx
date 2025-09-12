@@ -18,12 +18,11 @@ function App() {
 
   // ✅ Get user from backend
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-    
+    if (user) {
+      getToken().then((token)=>console.log(token))
     }
-
-    fetchCurrentUser()
-  }, [])
+    
+  }, [user])
 
   return (
     <>
