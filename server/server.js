@@ -6,6 +6,9 @@ import { inngest, functions } from "./inngest/index.js";
 import { serve } from "inngest/express"; 
 import { clerkMiddleware } from "@clerk/express";
 import userRouter from "./routes/userRoutes.js";
+import postRouter from "./routes/postroutes.js";
+import storyRouter from "./routes/storyRoutes.js";
+import messageRouter from "./routes/messageRoutes.js";
 
 const app = express();
 
@@ -28,6 +31,15 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 
 // ✅ User routes
 app.use("/api/user", userRouter);
+
+// ✅ Post routes
+app.use('/api/post', postRouter);
+
+// ✅ Story routes
+app.use('/api/story', storyRouter)
+
+// ✅ Message routes
+app.use('/api/message', messageRouter)
 
 // ✅ Handle unknown routes
 app.use((req, res) => {
