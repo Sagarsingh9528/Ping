@@ -17,7 +17,7 @@ function RecentMessages() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Recent messages API data:", data);
+      // console.log("Recent messages API data:", data);
 
       // ✅ check the array itself, not only success
       if (Array.isArray(data.messages) && data.messages.length > 0) {
