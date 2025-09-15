@@ -24,8 +24,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.6",
-    "prettier": "^3.6.2",
-    "serialize-error-cjs": "^0.2.0"
+    "prettier": "^3.6.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
