@@ -4,9 +4,11 @@ import { useNavigate, Link } from "react-router-dom";
 import MenuItems from "./MenuItems";
 import { CirclePlus, LogOut } from "lucide-react";
 import { UserButton, useClerk } from "@clerk/clerk-react";
+import { useSelector } from "react-redux";
 
 function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user.value);
   const { signOut } = useClerk();
 
   return (
@@ -43,15 +45,18 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         <div className="flex gap-2 items-center cursor-pointer">
           <UserButton />
           <div>
-            {/* Only dummyUserData.full_name */}
-            <h1 className="text-sm font-medium">{dummyUserData.full_name}</h1>
-            <p className="text-xs text-gray-500">@{dummyUserData.username}</p>
+            <h1 className="text-sm font-medium">
+              {user?.full_name || dummyUserData.full_name}
+            </h1>
+            <p className="text-xs text-gray-500">
+              @{user?.username || dummyUserData.username}
+            </p>
           </div>
         </div>
 
         <LogOut
           onClick={() => signOut()}
-          className="w-4.5 text-gray-400 hover:text-gray-700 transition cursor-pointer"
+          className="w-5 text-gray-400 hover:text-gray-700 transition cursor-pointer"
         />
       </div>
     </div>

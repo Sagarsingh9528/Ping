@@ -1,25 +1,46 @@
 import React, { useEffect, useState } from "react";
-import { assets, dummyPostsData } from "../assets/assets";
+import { assets } from "../assets/assets";
 import Loading from "../components/Loading";
 import StoriesBar from "../components/StoriesBar";
 import PostCard from "../components/PostCard";
 import RecentMessages from "../components/RecentMessages";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios.js";
+import toast from "react-hot-toast";
 
 function Feed() {
   const [feeds, setFeeds] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { getToken } = useAuth();
 
   const fetchFeeds = async () => {
-    // TODO: yaha backend API se fetch karna h future me
-    setFeeds(dummyPostsData);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const token = await getToken();               // ✅ store token first
+      const { data } = await api.get("/api/post/feed", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setFeeds(data.posts);
+      } else {
+        toast.error(data.message || "Failed to load feeds");
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchFeeds();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return !loading ? (
+  if (loading) return <Loading />;
+
+  return (
     <div className="h-full overflow-y-scroll no-scrollbar py-10 xl:pr-5 flex items-start justify-center xl:gap-8">
       {/* Story + Post list */}
       <div className="flex-1 max-w-2xl">
@@ -30,6 +51,7 @@ function Feed() {
           ))}
         </div>
       </div>
+
       {/* Right Sidebar */}
       <div className="max-xl:hidden sticky top-0 flex flex-col gap-6">
         {/* Sponsored */}
@@ -42,8 +64,8 @@ function Feed() {
           />
           <p className="text-slate-600 font-medium">Email marketing</p>
           <p className="text-slate-400">
-            Supercharge your marketing with a powerful, easy-to-use platform for
-            results.
+            Supercharge your marketing with a powerful, easy-to-use platform
+            for results.
           </p>
         </div>
 
@@ -51,8 +73,6 @@ function Feed() {
         <RecentMessages />
       </div>
     </div>
-  ) : (
-    <Loading />
   );
 }
 

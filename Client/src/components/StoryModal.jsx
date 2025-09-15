@@ -1,50 +1,102 @@
-import { ArrowLeft, Image as ImageIcon, Sparkle, TextIcon, Video as VideoIcon } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
+import {
+  ArrowLeft,
+  Image as ImageIcon,
+  Sparkle,
+  TextIcon,
+  Video as VideoIcon,
+} from "lucide-react";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import api from "../api/axios";
+
 
 function StoryModal({ setShowModal, fetchStories }) {
   const bgColors = ["#4f46e5", "#7c3aed", "#db2777", "#e11d48", "#ca8a04", "#0d9488"];
 
-  const [mode, setMode] = useState("text"); // text | media
+  const [mode, setMode] = useState("text"); // "text" | "media"
   const [background, setBackground] = useState(bgColors[0]);
   const [text, setText] = useState("");
   const [media, setMedia] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const { getToken } = useAuth();
+
+  const MAX_VIDEO_DURATION = 60; // seconds
+  const MAX_VIDEO_SIZE_MB = 50; // MB
 
   // 📂 Upload media (image/video)
-  const handleMediaUpload = (e, type) => {
+  const handleMediaUpload = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setMode("media");
+    if (!file) return;
+
+    setMode("media");
+
+    if (file.type.startsWith("video")) {
+      if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+        toast.error(`Video file size cannot exceed ${MAX_VIDEO_SIZE_MB} MB.`);
+        setMedia(null);
+        setPreviewUrl(null);
+        return;
+      }
+
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        if (video.duration > MAX_VIDEO_DURATION) {
+          toast.error("Video duration cannot exceed 1 minute.");
+          setMedia(null);
+          setPreviewUrl(null);
+        } else {
+          setMedia(file);
+          setPreviewUrl(URL.createObjectURL(file));
+          setText("");
+          setMode("media");
+          
+         
+        }
+      };
+      video.src = URL.createObjectURL(file);
+    } else if (file.type.startsWith("image")) {
       setMedia(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setText("");
+      setMode("media");
+      
     }
   };
 
   const handleCreateStory = async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newStory = {
-          id: Date.now(),
-          type: mode,
-          background,
-          content: text,
-          mediaUrl: previewUrl,
-          createdAt: "Just now",
-          user: {
-            name: "You",
-            profile_picture:
-              "https://ui-avatars.com/api/?name=You&background=4f46e5&color=fff",
-          },
-        };
+    const media_type =
+      mode === "media"
+        ? media?.type.startsWith("image")
+          ? "image"
+          : "video"
+        : "text";
 
-        console.log("Created story:", newStory);
+    if (media_type === "text" && !text.trim()) {
+      throw new Error("Please enter some text");
+    }
 
-        setShowModal(false);
-        fetchStories();
-        resolve(newStory);
-      }, 1000); // simulate API delay
+    const formData = new FormData();
+    formData.append("content", text);
+    formData.append("media_type", media_type);
+    if (media) formData.append("media", media);
+    formData.append("background_color", background);
+
+    const token = await getToken();
+
+    const { data } = await api.post("/api/story/create", formData, {
+      headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (data.success) {
+      setShowModal(false);
+      toast.success("Story created successfully");
+      fetchStories();
+    } else {
+      toast.error(data.message || "Something went wrong");
+    }
   };
 
   return (
@@ -131,7 +183,7 @@ function StoryModal({ setShowModal, fetchStories }) {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleMediaUpload(e, "photo")}
+                onChange={(e) => handleMediaUpload(e)}
                 className="hidden"
               />
             </label>
@@ -143,7 +195,7 @@ function StoryModal({ setShowModal, fetchStories }) {
               <input
                 type="file"
                 accept="video/*"
-                onChange={(e) => handleMediaUpload(e, "video")}
+                onChange={(e) => handleMediaUpload(e)}
                 className="hidden"
               />
             </label>
@@ -154,8 +206,7 @@ function StoryModal({ setShowModal, fetchStories }) {
             onClick={() =>
               toast.promise(handleCreateStory(), {
                 loading: "Saving...",
-                success: <p>Story Added</p>,
-                error: (e) => <p>{e.message}</p>,
+                
               })
             }
             className="px-4 py-2 bg-indigo-600 rounded-lg text-2xl font-medium items-center justify-center flex"

@@ -2,13 +2,19 @@ import React, { useState } from "react";
 import { dummyUserData } from "../assets/assets";
 import { Image } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios.js";
+import { useNavigate } from "react-router-dom";
 
 function CreatePost() {
+
+  const navigate = useNavigate()
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const user = dummyUserData;
+  const user = useSelector((state)=>state.user.value);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -17,7 +23,9 @@ function CreatePost() {
     setImages((prev) => [...prev, ...files]);
   };
 
-  const handleSubmit = () => {
+  const {getToken} = useAuth()
+
+  const handleSubmit = async () => {
     if (!content.trim() && images.length === 0) {
       toast.error("Post cannot be empty");
       return Promise.reject("Empty post"); // so toast.promise handles it
@@ -25,20 +33,30 @@ function CreatePost() {
 
     setLoading(true);
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          console.log("New Post:", { content, images });
-          setContent("");
-          setImages([]);
-          setLoading(false);
-          resolve("Post added successfully");
-        } catch (err) {
-          setLoading(false);
-          reject("Something went wrong");
-        }
-      }, 1000);
-    });
+    const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
+    try {
+      const formData = new FormData();
+      formData.append('content', content)
+      formData.append('post_type', postType)
+      images.map((image)=>{
+        formData.append('images', image)
+      })
+
+      const {data} = await api.post('api/post/add', formData, {
+        headers: {Authorization: `Bearer ${await getToken()}`}
+      })
+
+      if (data.success) {
+        navigate('/')
+      }else{
+        console.log(data.message)
+        throw new Error(data.message)
+      }
+    } catch (error) {
+      console.log(error.message)
+      throw new Error(error.message)
+    }
+    setLoading(false)
   };
 
   return (

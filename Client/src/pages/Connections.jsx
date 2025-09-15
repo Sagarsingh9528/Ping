@@ -1,21 +1,23 @@
-import React, { useState } from "react";
-import {
-  Users,
-  UserPlus,
-  UserCheck,
-  UserRoundPen,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Users, UserPlus, UserCheck, UserRoundPen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  dummyConnectionsData as connections,
-  dummyFollowingData as following,
-  dummyFollowersData as followers,
-  dummyPendingConnectionsData as pendingConnections,
-  assets,
-} from "../assets/assets";
+import { useSelector, useDispatch } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import { fetchConnections } from "../features/connections/connectionsSlice";
+import api from "../api/axios";
+import toast from "react-hot-toast";
+
+// ✅ IMPORT THE ASSETS OBJECT
+import { assets } from "../assets/assets";   // <-- add this line
 
 function Connections() {
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
+
+  const { connections, pendingConnections, followers, following } = useSelector(
+    (state) => state.connections
+  );
 
   const tabs = [
     { label: "Followers", value: followers, icon: Users },
@@ -24,12 +26,53 @@ function Connections() {
     { label: "Connections", value: connections, icon: UserPlus },
   ];
 
+  const acceptConnection = async (userId) => {
+    try {
+      const { data } = await api.post(
+        "/api/user/accept",
+        { id: userId },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        dispatch(fetchConnections(await getToken()));
+      } else {
+        toast(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleUnfollow = async (userId) => {
+    try {
+      const { data } = await api.post(
+        "/api/user/unfollow",
+        { id: userId },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        dispatch(fetchConnections(await getToken()));
+      } else {
+        toast(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    getToken().then((token) => {
+      dispatch(fetchConnections(token));
+    });
+  }, [dispatch, getToken]);
+
   const [activeTab, setActiveTab] = useState(tabs[0].label);
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Title */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-slate-900">Connections</h1>
           <p className="text-slate-600">
@@ -75,7 +118,7 @@ function Connections() {
         {/* Content */}
         <div className="grid md:grid-cols-2 gap-6">
           {tabs.map(
-            (tab, index) =>
+            (tab) =>
               activeTab === tab.label &&
               tab.value.map((user, i) => (
                 <div
@@ -85,27 +128,55 @@ function Connections() {
                   {/* Avatar */}
                   <img
                     src={assets.sample_profile}
-                    alt={user.name}
+                    alt={user.name || "User"}
                     className="w-14 h-14 rounded-full object-cover"
                   />
 
                   {/* Info */}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-slate-900">
-                      {user.name}
-                    </h3>
+                    <h3 className="font-semibold text-slate-900">{user.name}</h3>
                     <p className="text-sm text-slate-500">@{user.username}</p>
                     <p className="text-sm text-slate-600">{user.bio}</p>
                   </div>
 
-                  {/* Button */}
+                  {/* View Profile */}
                   <button
                     onClick={() => navigate(`/profile/${user._id}`)}
                     className="px-4 py-2 rounded-md text-white text-sm font-medium 
-                      bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 transition"
+                               bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 transition"
                   >
                     View Profile
                   </button>
+
+                  {activeTab === "Pending" && (
+                    <button
+                      onClick={() => acceptConnection(user._id)}
+                      className="ml-2 px-4 py-2 rounded-md text-white text-sm font-medium bg-green-500 hover:bg-green-600 transition"
+                    >
+                      Accept
+                    </button>
+                  )}
+
+                  {activeTab === "Following" && (
+                    <button
+                      onClick={() => handleUnfollow(user._id)}
+                      className="ml-2 px-4 py-2 rounded-md text-white text-sm font-medium bg-red-500 hover:bg-red-600 transition"
+                    >
+                      Unfollow
+                    </button>
+                  )}
+                  
+                  {/* {activeTab === "Followers" && (
+                    <button
+                      onClick={() => {
+                       
+                      }}
+                      className="ml-2 px-4 py-2 rounded-md text-white text-sm font-medium bg-blue-500 hover:bg-blue-600 transition"
+                    >
+                      Follow Back
+                    </button>
+                  )} */}
+                  
                 </div>
               ))
           )}

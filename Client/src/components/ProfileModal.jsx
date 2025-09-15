@@ -1,30 +1,74 @@
 import React, { useState } from "react";
-import { dummyUserData } from "../assets/assets";
 import { Pencil } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../features/user/userSlice.js";
+import { useAuth } from "@clerk/clerk-react";
 
-function ProfileModal({setShowEdit}) {
-  const user = dummyUserData;
+function ProfileModal({ setShowEdit }) {
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.value);
+
   const [editForm, setEditForm] = useState({
-    username: user.username,
-    bio: user.bio,
-    location: user.location,
+    username: user.username || "",
+    bio: user.bio || "",
+    location: user.location || "",
     profile_picture: null,
     cover_photo: null,
-    full_name: user.full_name,
+    full_name: user.full_name || "",
   });
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    toast.success("Profile updated successfully 🚀");
+    try {
+      const userData = new FormData();
+      const {
+        full_name,
+        username,
+        bio,
+        location,
+        profile_picture,
+        cover_photo,
+      } = editForm;
+
+      userData.append("username", username);
+      userData.append("bio", bio);
+      userData.append("full_name", full_name);
+      userData.append("location", location);
+      if (profile_picture) userData.append("profile", profile_picture);
+      if (cover_photo) userData.append("cover", cover_photo);
+
+      // ✅ Show loader while the async update runs
+      toast.promise(
+        (async () => {
+          const token = await getToken();
+          await dispatch(updateUser({ userData, token })).unwrap();
+          setShowEdit(false); // close modal on success
+        })(),
+        {
+          loading: "Saving...",
+          success: "Profile updated successfully",
+          duration: 3000,
+          error: "Failed to update profile",
+        }
+      );
+      // const token = await getToken()
+      // dispatch(updateUser({userData, token}))
+    } catch (error) {
+      toast.error(error.message)
+    }
   };
 
   return (
     <div className="fixed top-0 bottom-0 left-0 right-0 z-110 h-screen overflow-y-scroll bg-black/50">
       <div className="max-w-2xl sm:py-6 mx-auto">
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">
+            Edit Profile
+          </h1>
 
+          {/* ✅ onSubmit now just calls handleSaveProfile */}
           <form className="space-y-4" onSubmit={handleSaveProfile}>
             {/* Profile Picture */}
             <div className="flex flex-col items-start gap-3">
@@ -39,7 +83,10 @@ function ProfileModal({setShowEdit}) {
                   accept="image/*"
                   id="profile_picture"
                   onChange={(e) =>
-                    setEditForm({ ...editForm, profile_picture: e.target.files[0] })
+                    setEditForm({
+                      ...editForm,
+                      profile_picture: e.target.files[0],
+                    })
                   }
                 />
                 <div className="group/profile relative cursor-pointer w-24 h-24 mt-2">
@@ -50,7 +97,7 @@ function ProfileModal({setShowEdit}) {
                         : user.profile_picture
                     }
                     className="w-24 h-24 rounded-full object-cover"
-                    alt=""
+                    alt="profile"
                   />
                   <div className="absolute hidden group-hover/profile:flex top-0 left-0 right-0 bottom-0 bg-black/30 rounded-full items-center justify-center">
                     <Pencil className="w-5 h-5 text-white" />
@@ -72,7 +119,10 @@ function ProfileModal({setShowEdit}) {
                   accept="image/*"
                   id="cover_photo"
                   onChange={(e) =>
-                    setEditForm({ ...editForm, cover_photo: e.target.files[0] })
+                    setEditForm({
+                      ...editForm,
+                      cover_photo: e.target.files[0],
+                    })
                   }
                 />
                 <div className="group/cover relative cursor-pointer mt-2 w-full max-w-md">
@@ -83,7 +133,7 @@ function ProfileModal({setShowEdit}) {
                         : user.cover_photo
                     }
                     className="w-full h-40 rounded-lg object-cover"
-                    alt=""
+                    alt="cover"
                   />
                   <div className="absolute hidden group-hover/cover:flex top-0 left-0 right-0 bottom-0 bg-black/30 rounded-lg items-center justify-center">
                     <Pencil className="w-6 h-6 text-white" />
@@ -155,9 +205,8 @@ function ProfileModal({setShowEdit}) {
             {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
               <button
-                onClick={()=>setShowEdit(false)}
-                
                 type="button"
+                onClick={() => setShowEdit(false)}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer"
               >
                 Cancel
@@ -172,7 +221,7 @@ function ProfileModal({setShowEdit}) {
           </form>
         </div>
       </div>
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
     </div>
   );
 }
