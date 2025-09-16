@@ -43,6 +43,7 @@ const vercelPreviewRegex = /^https:\/\/ping-vshc-[^.]+\.vercel\.app$/;
 //     credentials: true,
 //   })
 // );
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
