@@ -17,24 +17,20 @@ function RecentMessages() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // console.log("Recent messages API data:", data);
-
-      // ✅ check the array itself, not only success
-      if (Array.isArray(data.messages) && data.messages.length > 0) {
-        // Group messages by sender and get the latest message for each sender
-        const groupedMessages = data.messages.reduce((acc, message) => {
+      if (Array.isArray(data.messages)) {
+        // group by sender and pick the latest message
+        const grouped = data.messages.reduce((acc, message) => {
           const senderId = message.from_user_id?._id;
           if (!senderId) return acc;
 
-          if (
-            !acc[senderId] ||
-            new Date(message.createdAt) > new Date(acc[senderId].createdAt)
-          ) {
+          const prev = acc[senderId];
+          if (!prev || new Date(message.createdAt) > new Date(prev.createdAt)) {
             acc[senderId] = message;
 
-            // optional browser notification
+            // optional browser notification for unseen message
             if (
-              typeof Notification !== "undefined" &&
+              typeof window !== "undefined" &&
+              "Notification" in window &&
               Notification.permission === "granted" &&
               !message.seen
             ) {
@@ -47,40 +43,41 @@ function RecentMessages() {
           return acc;
         }, {});
 
-        // Sort messages by date
-        const sortedMessages = Object.values(groupedMessages).sort(
+        // sort newest first
+        const sorted = Object.values(grouped).sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-
-        setMessages(sortedMessages);
+        setMessages(sorted);
       } else {
-        // still show a toast if you want to notify about empty list
-        toast.error(data.message || "No recent messages");
-        setMessages([]); // make sure state resets
+        // no error toast for empty list—just clear state
+        setMessages([]);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Failed to fetch recent messages");
     }
   };
 
   useEffect(() => {
-    if (user) {
-      // ask for notification permission once
-      if (typeof Notification !== "undefined" &&
-          Notification.permission !== "granted" &&
-          Notification.permission !== "denied") {
-        Notification.requestPermission();
-      }
+    if (!user) return;
 
-      fetchRecentMessages();
-      const intervalId = setInterval(fetchRecentMessages, 30000); // every 30s
-      return () => clearInterval(intervalId); // ✅ cleanup correctly
+    // ask for notification permission once
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "default"
+    ) {
+      Notification.requestPermission().catch(() => {});
     }
+
+    fetchRecentMessages();
+    const id = setInterval(fetchRecentMessages, 30000); // every 30s
+    return () => clearInterval(id);
   }, [user]);
 
   return (
     <div className="bg-white max-w-xs mt-4 p-4 min-h-20 rounded-md shadow text-xs text-slate-800">
       <h3 className="font-semibold text-slate-800 mb-4">Recent Messages</h3>
+
       <div className="flex flex-col max-h-56 overflow-y-scroll no-scrollbar">
         {messages.length === 0 && (
           <p className="text-slate-500 text-center text-[11px] mt-2">
@@ -95,7 +92,7 @@ function RecentMessages() {
           return (
             <Link
               key={msg._id}
-              to={`/chat/${sender.username}`}
+              to={`/chat/${sender._id}`} // ✅ ensure you pass the id you use in Chat route
               className="flex items-center gap-2 py-2 px-2 rounded-md hover:bg-slate-100 transition"
             >
               <img
