@@ -92,7 +92,7 @@ function RecentMessages() {
           return (
             <Link
               key={msg._id}
-              to={`/chat/${sender._id}`} // ✅ ensure you pass the id you use in Chat route
+              to={`/chat/${sender._id}`} 
               className="flex items-center gap-2 py-2 px-2 rounded-md hover:bg-slate-100 transition"
             >
               <img

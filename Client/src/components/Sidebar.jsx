@@ -18,7 +18,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
       } transition-all duration-300 ease-in-out`}
     >
       <div className="w-full">
-        {/* Logo */}
+       
         <img
           onClick={() => navigate("/")}
           src={assets.logo}
@@ -27,10 +27,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         />
         <hr className="border-gray-300 mb-8" />
 
-        {/* Menu Items */}
+        
         <MenuItems setSidebarOpen={setSidebarOpen} />
 
-        {/* Create Post Button */}
+       
         <Link
           to="/create-post"
           className="flex items-center justify-center gap-2 py-2.5 mt-6 mx-6 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95 transition text-white cursor-pointer"
@@ -40,7 +40,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </Link>
       </div>
 
-      {/* Footer User Info */}
+      
       <div className="w-full border-t border-gray-200 p-4 px-7 flex items-center justify-between">
         <div className="flex gap-2 items-center cursor-pointer">
           <UserButton />

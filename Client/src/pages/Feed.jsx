@@ -52,9 +52,8 @@ function Feed() {
         </div>
       </div>
 
-      {/* Right Sidebar */}
       <div className="max-xl:hidden sticky top-0 flex flex-col gap-6">
-        {/* Sponsored */}
+        
         <div className="max-w-xs bg-white text-xs p-4 rounded-md inline-flex flex-col gap-2 shadow">
           <h3 className="text-slate-800 font-semibold">Sponsored</h3>
           <img
@@ -69,7 +68,6 @@ function Feed() {
           </p>
         </div>
 
-        {/* Recent Messages */}
         <RecentMessages />
       </div>
     </div>

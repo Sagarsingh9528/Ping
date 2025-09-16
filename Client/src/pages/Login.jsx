@@ -7,7 +7,7 @@ function Login() {
   return (
     <div className='min-h-screen flex flex-col md:flex-row'>
         <img src={assets.bgImage} alt="" className='absolute top-0 left-0 -z-1 w-full h-full object-cover'/>
-        {/* left side branding  */}
+        
         <div className='flex flex-col flex-1 items-start justify-between p-6 md:p-10 lg:pl-40'>
             <img src={assets.logo} alt="" className='h-25 object-contain'/>
             <div>
@@ -28,7 +28,7 @@ function Login() {
             </div>
             <span className='md:h-10'></span>
         </div>
-        {/* Right side Login form  */}
+        
         <div className='flex-1 flex items-center justify-center p-6 sm:p-10'>
             <SignIn/>
         </div>

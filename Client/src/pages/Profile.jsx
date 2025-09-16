@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import api from "../api/axios.js";
 
 function Profile() {
-  // must match your route param name (case-sensitive)
+  
   const currentUser = useSelector((state)=> state.user.value)
   const {getToken} = useAuth()
   const { profileId } = useParams();
@@ -20,7 +20,7 @@ function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
-  const [showEdit, setShowEdit] = useState(false); // boolean not string
+  const [showEdit, setShowEdit] = useState(false); 
 
   const fetchUser = async (profileId) => {
     const token = await getToken()
@@ -51,9 +51,9 @@ function Profile() {
   return user ? (
     <div className="relative h-full overflow-y-scroll bg-gray-50 p-6">
       <div className="max-w-3xl mx-auto">
-        {/* Profile Card */}
+        
         <div className="bg-white rounded-2xl shadow overflow-hidden">
-          {/* Cover photo */}
+          
           <div className="h-40 md:h-56 bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200">
             {user.cover_photo && (
               <img
@@ -64,16 +64,16 @@ function Profile() {
             )}
           </div>
 
-          {/* user info */}
+          
           <UserProfileInfo
             user={user}
             posts={posts}
-            profileId={profileId} // lowercase prop
+            profileId={profileId} 
             setShowEdit={setShowEdit}
           />
         </div>
 
-        {/* Tabs */}
+        
         <div className="mt-6">
           <div className="bg-white rounded-xl shadow p-1 flex max-w-md mx-auto ">
             {["posts", "media", "likes"].map((tab) => (
@@ -91,7 +91,7 @@ function Profile() {
             ))}
           </div>
 
-          {/* Posts */}
+          
           {activeTab === "posts" && (
             <div className="mt-6 flex flex-col items-center gap-6">
               {posts.map((post) => (
@@ -100,7 +100,7 @@ function Profile() {
             </div>
           )}
 
-          {/* Media */}
+          
           {activeTab === "media" && (
             <div className="flex flex-wrap mt-6 max-w-6xl">
               {posts
@@ -128,7 +128,7 @@ function Profile() {
           )}
         </div>
       </div>
-      {/* Edit profile  */}
+      
       {showEdit && <ProfileModal setShowEdit={setShowEdit}/>}
     </div>
   ) : (

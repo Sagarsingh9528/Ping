@@ -10,17 +10,17 @@ import toast from "react-hot-toast";
 function ChatBox() {
   const { messages } = useSelector((state) => state.messages);
   const connections = useSelector((state) => state.connections.connections);
-  const { userId } = useParams(); // the other user
-  const { getToken, userId: currentUserId } = useAuth(); // logged-in user
+  const { userId } = useParams(); 
+  const { getToken, userId: currentUserId } = useAuth(); 
   const dispatch = useDispatch();
 
   const [text, setText] = useState("");
-  const [image, setImage] = useState(null); // ✅ single image
+  const [image, setImage] = useState(null); 
   const [user, setUser] = useState(null);
 
   const messagesEndRef = useRef(null);
 
-  // Fetch messages
+  
   const fetchUserMessages = async () => {
     try {
       const token = await getToken();
@@ -30,7 +30,7 @@ function ChatBox() {
     }
   };
 
-  // Send text + image
+  
   const sendMessage = async () => {
     try {
       if (!text && !image) return;
@@ -39,7 +39,7 @@ function ChatBox() {
       const formData = new FormData();
       formData.append("to_user_id", userId);
       formData.append("text", text);
-      if (image) formData.append("image", image); // ✅ must match backend
+      if (image) formData.append("image", image); 
 
       const { data } = await api.post("/api/message/send", formData, {
         headers: { Authorization: `Bearer ${token}` },
@@ -48,7 +48,7 @@ function ChatBox() {
       if (data.success) {
         setText("");
         setImage(null);
-        dispatch(addMessage(data.message)); // single message
+        dispatch(addMessage(data.message)); 
       } else {
         throw new Error(data.message || "Failed to send message");
       }
@@ -57,13 +57,13 @@ function ChatBox() {
     }
   };
 
-  // Initial load & cleanup
+  
   useEffect(() => {
     fetchUserMessages();
     return () => dispatch(resetMessages());
   }, [userId]);
 
-  // Set chat user info
+  
   useEffect(() => {
     if (connections.length > 0) {
       const u = connections.find((c) => c._id === userId);
@@ -71,14 +71,14 @@ function ChatBox() {
     }
   }, [connections, userId]);
 
-  // Auto-scroll
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle image selection
+  
   const handleImageUpload = (e) => {
-    const file = e.target.files[0]; // single file
+    const file = e.target.files[0]; 
     setImage(file || null);
   };
 
@@ -88,7 +88,7 @@ function ChatBox() {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header */}
+      
       <div className="flex items-center gap-2 p-2 md:px-10 xl:pl-42 bg-gradient-to-r from-indigo-50 border-b border-gray-300">
         <img src={user.profile_picture} className="w-8 h-8 rounded-full" alt="" />
         <div>
@@ -97,7 +97,7 @@ function ChatBox() {
         </div>
       </div>
 
-      {/* Messages */}
+      
       <div className="p-5 xl:pl-42 md:px-10 h-full overflow-y-scroll">
         <div className="space-y-4 max-w-4xl mx-auto">
           {messages
@@ -132,10 +132,10 @@ function ChatBox() {
         </div>
       </div>
 
-      {/* Input */}
+      
       <div className="px-4">
         <div className="flex items-center gap-2 pl-3 pr-2 py-2 bg-white w-full max-w-xl mx-auto border border-gray-200 shadow rounded-full mb-5">
-          {/* Image Upload */}
+          
           <label htmlFor="imageUpload" className="cursor-pointer flex items-center">
             <Image className="text-gray-500 hover:text-indigo-500 cursor-pointer" size={22} />
           </label>
@@ -147,7 +147,7 @@ function ChatBox() {
             onChange={handleImageUpload}
           />
 
-          {/* Preview */}
+          
           {image && (
             <div className="relative cursor-pointer">
               <img
@@ -165,7 +165,7 @@ function ChatBox() {
             </div>
           )}
 
-          {/* Text Input */}
+          
           <input
             type="text"
             placeholder="Type a message..."
@@ -174,7 +174,7 @@ function ChatBox() {
             className="flex-1 outline-none bg-transparent text-sm ml-2"
           />
 
-          {/* Send */}
+          
           <button
             onClick={sendMessage}
             className="p-2 rounded-full hover:bg-indigo-50 cursor-pointer"

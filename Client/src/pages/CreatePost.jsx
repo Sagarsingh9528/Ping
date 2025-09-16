@@ -28,7 +28,7 @@ function CreatePost() {
   const handleSubmit = async () => {
     if (!content.trim() && images.length === 0) {
       toast.error("Post cannot be empty");
-      return Promise.reject("Empty post"); // so toast.promise handles it
+      return Promise.reject("Empty post"); 
     }
 
     setLoading(true);
@@ -62,15 +62,15 @@ function CreatePost() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Title */}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Create Post</h1>
           <p className="text-slate-600">Share your thoughts with the world</p>
         </div>
 
-        {/* Form */}
+        
         <div className="max-w-xl bg-white p-4 sm:p-8 rounded-xl shadow-md space-y-4">
-          {/* Header */}
+          
           <div className="flex items-center gap-3">
             <img
               src={user.profile_picture}
@@ -83,7 +83,7 @@ function CreatePost() {
             </div>
           </div>
 
-          {/* Textarea */}
+          
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -92,9 +92,9 @@ function CreatePost() {
             rows={3}
           />
 
-          {/* Footer (Image Upload + Publish Button) */}
+          
           <div className="flex items-center justify-between pt-2">
-            {/* Image Upload */}
+           
             <label className="cursor-pointer flex items-center text-slate-500 hover:text-slate-700">
               <Image className="w-6 h-6" />
               <input
@@ -106,7 +106,7 @@ function CreatePost() {
               />
             </label>
 
-            {/* Publish Button */}
+            
             <button
               onClick={() =>
                 toast.promise(handleSubmit(), {
@@ -122,7 +122,7 @@ function CreatePost() {
             </button>
           </div>
 
-          {/* Preview selected images */}
+          
           {images.length > 0 && (
             <div className="flex gap-2 flex-wrap mt-2">
               {images.map((img, index) => (

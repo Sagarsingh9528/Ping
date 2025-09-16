@@ -14,17 +14,17 @@ import api from "../api/axios";
 function StoryModal({ setShowModal, fetchStories }) {
   const bgColors = ["#4f46e5", "#7c3aed", "#db2777", "#e11d48", "#ca8a04", "#0d9488"];
 
-  const [mode, setMode] = useState("text"); // "text" | "media"
+  const [mode, setMode] = useState("text"); 
   const [background, setBackground] = useState(bgColors[0]);
   const [text, setText] = useState("");
   const [media, setMedia] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const { getToken } = useAuth();
 
-  const MAX_VIDEO_DURATION = 60; // seconds
-  const MAX_VIDEO_SIZE_MB = 50; // MB
+  const MAX_VIDEO_DURATION = 60; 
+  const MAX_VIDEO_SIZE_MB = 50;
 
-  // 📂 Upload media (image/video)
+  
   const handleMediaUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -102,7 +102,7 @@ function StoryModal({ setShowModal, fetchStories }) {
   return (
     <div className="fixed inset-0 z-[110] min-h-screen bg-black/80 backdrop-blur text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
+        
         <div className="text-center mb-4 flex items-center justify-between">
           <button
             onClick={() => setShowModal(false)}
@@ -114,7 +114,7 @@ function StoryModal({ setShowModal, fetchStories }) {
           <span className="w-10"></span>
         </div>
 
-        {/* Story Preview */}
+        
         <div
           className="rounded-lg h-96 flex items-center justify-center relative overflow-hidden"
           style={{ backgroundColor: mode === "text" ? background : "#000" }}
@@ -147,7 +147,7 @@ function StoryModal({ setShowModal, fetchStories }) {
           )}
         </div>
 
-        {/* Background selector (only for text mode) */}
+        
         {mode === "text" && (
           <div className="flex mt-5 gap-2">
             {bgColors.map((color, idx) => (
@@ -163,9 +163,9 @@ function StoryModal({ setShowModal, fetchStories }) {
           </div>
         )}
 
-        {/* Controls */}
+        
         <div className="flex justify-between mt-5 items-center">
-          {/* Mode Switch + Upload */}
+         
           <div className="flex gap-2">
             <button
               onClick={() => setMode("text")}
@@ -176,7 +176,7 @@ function StoryModal({ setShowModal, fetchStories }) {
               <TextIcon size={18} /> Text
             </button>
 
-            {/* Photo Upload */}
+            
             <label className="px-3 py-1 rounded-lg text-sm bg-white/20 cursor-pointer flex items-center gap-1">
               <ImageIcon size={16} />
               Photo
@@ -188,7 +188,7 @@ function StoryModal({ setShowModal, fetchStories }) {
               />
             </label>
 
-            {/* Video Upload */}
+            
             <label className="px-3 py-1 rounded-lg text-sm bg-white/20 cursor-pointer flex items-center gap-1">
               <VideoIcon size={16} />
               Video
@@ -201,7 +201,7 @@ function StoryModal({ setShowModal, fetchStories }) {
             </label>
           </div>
 
-          {/* Share button */}
+         
           <button
             onClick={() =>
               toast.promise(handleCreateStory(), {

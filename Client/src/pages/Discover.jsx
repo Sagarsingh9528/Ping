@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { fetchUser } from "../features/user/userSlice";
-// import UserCard from "./UserCard // <── import your card
+
 import UserCard from "../components/UserCard";
 
 function Discover() {
@@ -15,7 +15,7 @@ function Discover() {
   const [loading, setLoading] = useState(false);
   const { getToken } = useAuth();
 
-  // 🔎 Search when Enter is pressed
+  
   const handleSearch = async (e) => {
     if (e.key === "Enter" && input.trim()) {
       try {
@@ -37,7 +37,7 @@ function Discover() {
     }
   };
 
-  // load current user in redux
+  
   useEffect(() => {
     getToken().then((token) => dispatch(fetchUser(token)));
   }, [dispatch, getToken]);
@@ -52,7 +52,7 @@ function Discover() {
           </p>
         </div>
 
-        {/* Search Bar */}
+        
         <div className="mb-8">
           <input
             type="text"
@@ -68,7 +68,6 @@ function Discover() {
           <p className="text-center text-slate-500">Searching...</p>
         )}
 
-        {/* ✅ Render UserCard with follow handler inside it */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {users.map((user) => (
             <UserCard key={user._id} user={user} />

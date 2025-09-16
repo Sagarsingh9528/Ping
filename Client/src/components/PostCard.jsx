@@ -8,17 +8,17 @@ import api from "../api/axios";
 import toast from "react-hot-toast";
 
 function PostCard({ post, onDelete }) {
-  // ✅ likes is an array of userIds (if backend sends it)
+  
   const [likes, setLikes] = useState(post.likes || []);
 
   const { getToken } = useAuth();
   const currentUser = useSelector((state) => state.user.value);
   const navigate = useNavigate();
 
-  // ✅ derive liked status from likes array
+  
   const liked = likes.includes(currentUser?._id);
 
-  // 🔗 Format hashtags
+  
   const formatContent = (text) =>
     text
       ? text.replace(
@@ -28,7 +28,7 @@ function PostCard({ post, onDelete }) {
         )
       : "";
 
-  // ❤️ Like / Unlike
+  
   const handleLike = async () => {
     try {
       const token = await getToken();
@@ -53,7 +53,7 @@ function PostCard({ post, onDelete }) {
     }
   };
 
-  // 🗑️ Delete handler
+  
   const handleDelete = () => {
     if (onDelete) onDelete(post._id);
   };
@@ -62,7 +62,7 @@ function PostCard({ post, onDelete }) {
 
   return (
     <div className="bg-white rounded-xl shadow p-4 space-y-3 w-full max-w-2xl">
-      {/* user info */}
+      
       <div
         onClick={() => navigate("/profile/" + post.user?._id)}
         className="inline-flex items-center gap-3 cursor-pointer"
@@ -90,7 +90,7 @@ function PostCard({ post, onDelete }) {
         )}
       </div>
 
-      {/* content */}
+      
       {post.content && (
         <div
           className="text-gray-800 text-sm whitespace-pre-line"
@@ -98,7 +98,7 @@ function PostCard({ post, onDelete }) {
         />
       )}
 
-      {/* images */}
+      
       {post.image_urls?.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {post.image_urls.map((img, index) => (
@@ -114,12 +114,12 @@ function PostCard({ post, onDelete }) {
         </div>
       )}
 
-      {/* like, comment, share */}
+     
       <div className="flex items-center gap-4 pt-1">
-        {/* Like */}
+        
         <button
           onClick={handleLike}
-          // disabled={isOwner}
+          
           className={`flex items-center gap-1 transition ${
             isOwner
               ? "text-gray-400 cursor-pointer"
@@ -132,13 +132,13 @@ function PostCard({ post, onDelete }) {
           <span className="text-sm">{likes.length}</span>
         </button>
 
-        {/* Comment */}
+        
         <button className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition">
           <MessageCircle className="w-5 h-5" />
           <span className="text-sm">{post.comments?.length || 0}</span>
         </button>
 
-        {/* Share */}
+        
         <button className="flex items-center gap-1 text-gray-600 hover:text-green-500 transition">
           <Share2 className="w-5 h-5" />
           <span className="text-sm">7</span>

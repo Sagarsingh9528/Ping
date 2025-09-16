@@ -39,12 +39,12 @@ function ProfileModal({ setShowEdit }) {
       if (profile_picture) userData.append("profile", profile_picture);
       if (cover_photo) userData.append("cover", cover_photo);
 
-      // ✅ Show loader while the async update runs
+      
       toast.promise(
         (async () => {
           const token = await getToken();
           await dispatch(updateUser({ userData, token })).unwrap();
-          setShowEdit(false); // close modal on success
+          setShowEdit(false); 
         })(),
         {
           loading: "Saving...",
@@ -53,8 +53,7 @@ function ProfileModal({ setShowEdit }) {
           error: "Failed to update profile",
         }
       );
-      // const token = await getToken()
-      // dispatch(updateUser({userData, token}))
+      
     } catch (error) {
       toast.error(error.message)
     }
@@ -68,9 +67,9 @@ function ProfileModal({ setShowEdit }) {
             Edit Profile
           </h1>
 
-          {/* ✅ onSubmit now just calls handleSaveProfile */}
+          
           <form className="space-y-4" onSubmit={handleSaveProfile}>
-            {/* Profile Picture */}
+            
             <div className="flex flex-col items-start gap-3">
               <label
                 htmlFor="profile_picture"
@@ -106,7 +105,7 @@ function ProfileModal({ setShowEdit }) {
               </label>
             </div>
 
-            {/* Cover Photo */}
+            
             <div className="flex flex-col items-start gap-3">
               <label
                 htmlFor="cover_photo"
@@ -142,7 +141,7 @@ function ProfileModal({ setShowEdit }) {
               </label>
             </div>
 
-            {/* Full Name */}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Name
@@ -157,7 +156,7 @@ function ProfileModal({ setShowEdit }) {
               />
             </div>
 
-            {/* Username */}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Username
@@ -172,7 +171,7 @@ function ProfileModal({ setShowEdit }) {
               />
             </div>
 
-            {/* Bio */}
+           
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Bio
@@ -187,7 +186,7 @@ function ProfileModal({ setShowEdit }) {
               />
             </div>
 
-            {/* Location */}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Location
@@ -202,7 +201,7 @@ function ProfileModal({ setShowEdit }) {
               />
             </div>
 
-            {/* Buttons */}
+           
             <div className="flex justify-end gap-3 pt-4">
               <button
                 type="button"
@@ -221,7 +220,7 @@ function ProfileModal({ setShowEdit }) {
           </form>
         </div>
       </div>
-      {/* <Toaster position="top-right" /> */}
+     
     </div>
   );
 }

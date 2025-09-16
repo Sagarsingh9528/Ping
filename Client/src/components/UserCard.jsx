@@ -16,7 +16,7 @@ function UserCard({ user }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Sync local state with Redux
+  
   useEffect(() => {
     setIsFollowing(currentUser?.following?.includes(user._id));
     setIsConnected(currentUser?.connections?.includes(user._id));
@@ -34,8 +34,8 @@ function UserCard({ user }) {
 
       if (data.success) {
         toast.success(data.message);
-        setIsFollowing(true); // immediate UI update
-        dispatch(fetchUser(token)); // update Redux state
+        setIsFollowing(true); 
+        dispatch(fetchUser(token)); 
       } else {
         toast.error(data.message);
       }
@@ -57,7 +57,7 @@ function UserCard({ user }) {
       );
       if (data.success) {
         toast.success(data.message);
-        setIsConnected(true); // immediate UI update
+        setIsConnected(true);
       } else {
         toast.error(data.message);
       }

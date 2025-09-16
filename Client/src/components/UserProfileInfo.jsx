@@ -2,7 +2,7 @@ import { Verified, MapPin, Calendar, PenBox } from "lucide-react";
 import React from "react";
 
 function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
-  // helper to format date -> "Month YYYY"
+  
   const formatJoinedDate = (dateString) => {
     if (!dateString) return null;
     const date = new Date(dateString);
@@ -12,16 +12,16 @@ function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
   return (
     <div className="relative py-4 px-6 md:px-8 bg-white">
       <div className="flex flex-col md:flex-row items-start gap-6">
-        {/* Profile Picture */}
+        
         <div className="w-32 h-32 border-4 border-white shadow-lg absolute -top-16 rounded-full overflow-hidden">
           <img
-            src={user.profile_picture || "/default-avatar.png"} // ✅ only schema field + fallback
+            src={user.profile_picture || "/default-avatar.png"} 
             className="w-full h-full object-cover rounded-full"
             alt="profile"
           />
         </div>
 
-        {/* User Info */}
+        
         <div className="w-full pt-16 md:pt-0 md:pl-36">
           <div className="flex flex-col md:flex-row items-start justify-between w-full">
             <div>
@@ -37,14 +37,14 @@ function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
                 {user.username ? `@${user.username}` : "Add a username"}
               </p>
 
-              {/* Bio */}
+              
               {user.bio && (
                 <p className="mt-3 text-gray-800 text-sm leading-relaxed">
                   {user.bio}
                 </p>
               )}
 
-              {/* Location + Joined */}
+              
               <div className="flex flex-wrap gap-4 mt-3 text-gray-500 text-sm">
                 {user.location && (
                   <span className="flex items-center gap-1">
@@ -60,7 +60,7 @@ function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
                 )}
               </div>
 
-              {/* Stats Row */}
+              
               <div className="flex gap-6 mt-6 text-sm border-t border-gray-200 pt-4">
                 <span>
                   <b>{posts.length}</b> Posts
@@ -74,7 +74,7 @@ function UserProfileInfo({ user, posts, profileId, setShowEdit }) {
               </div>
             </div>
 
-            {/* Edit Button */}
+            
             {!profileId && (
               <button
                 onClick={() => setShowEdit(true)}

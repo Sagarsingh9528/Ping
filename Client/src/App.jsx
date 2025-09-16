@@ -24,7 +24,7 @@ function App() {
   const pathnameRef = useRef(pathname)
   const dispatch = useDispatch()
 
-  // ✅ Get user from backend
+  
   useEffect(() => {
     const fetchdata = async () => {
       if (user) {

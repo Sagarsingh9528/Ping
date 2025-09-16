@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 function StoryViewer({ viewStory, setViewStory }) {
   const [progress, setProgress] = useState(0);
-  const duration = viewStory.media_type === "video" ? null : 5000; // 5s for image/text
+  const duration = viewStory.media_type === "video" ? null : 5000; 
   const timerRef = useRef(null);
 
   const handleClose = () => {
@@ -20,10 +20,10 @@ function StoryViewer({ viewStory, setViewStory }) {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(timerRef.current);
-            setViewStory(null); // auto close after time
+            setViewStory(null); 
             return 100;
           }
-          return prev + 2; // progress speed (50 steps → 5 sec)
+          return prev + 2; 
         });
       }, duration / 50);
     }
@@ -74,7 +74,7 @@ function StoryViewer({ viewStory, setViewStory }) {
             : "#000000",
       }}
     >
-      {/* progress bar */}
+      
       <div className="absolute top-0 left-0 w-full h-1 bg-gray-700">
         <div
           className="h-full bg-white transition-all duration-100 linear"
@@ -82,7 +82,7 @@ function StoryViewer({ viewStory, setViewStory }) {
         ></div>
       </div>
 
-      {/* user info top left */}
+      
       <div className="absolute top-4 left-4 flex items-center space-x-3 p-2 px-4 sm:p-4 sm:px-8 backdrop-blur-2xl rounded bg-black/50">
         <img
           src={viewStory.user?.profile_picture}
@@ -95,7 +95,7 @@ function StoryViewer({ viewStory, setViewStory }) {
         </div>
       </div>
 
-      {/* close button */}
+      
       <button
         onClick={handleClose}
         className="absolute top-4 right-4 text-white text-3xl font-bold"
@@ -103,7 +103,7 @@ function StoryViewer({ viewStory, setViewStory }) {
         <X className="w-8 h-8 hover:scale-110 transition cursor-pointer" />
       </button>
 
-      {/* content wrapper */}
+      
       <div className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
         {renderContent()}
       </div>
