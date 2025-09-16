@@ -4,7 +4,7 @@ import Story from '../models/Story.js';
 import User from '../models/userModel.js';
 import { inngest } from '../inngest/index.js';
 
-// Add User Stroy 
+
 export const addUserStory = async (req, res)=>{
     try {
         const {userId} = req.auth();
@@ -12,7 +12,7 @@ export const addUserStory = async (req, res)=>{
         const media = req.file
         let media_url = ''
 
-        // Upload media to imagekit
+        
         if (media_type == 'image' || media_type == 'video') {
             const fileBuffer = fs.readFileSync(media.path)
             const response = await imagekit.upload({
@@ -24,7 +24,7 @@ export const addUserStory = async (req, res)=>{
 
         }
 
-        //Create story 
+        
         const story  = await Story.create({
             user: userId,
             content,
@@ -33,7 +33,7 @@ export const addUserStory = async (req, res)=>{
             background_color
         })
 
-        // schedule story deletion after 24 hours
+        
         await inngest.send({
             name: 'app/story.delete',
             data: {storyId: story._id}

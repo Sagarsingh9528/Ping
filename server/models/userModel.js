@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema(
   {
-    _id: { type: String, required: true }, // force Clerk id
+    _id: { type: String, required: true }, 
     email: { type: String, unique: true, index: true },
     password: { type: String, select: false },
     full_name: { type: String, required: true },

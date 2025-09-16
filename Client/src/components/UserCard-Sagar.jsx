@@ -15,7 +15,7 @@ function UserCard({ user }) {
 
   const handleFollow = async () => {
     try {
-      console.log("✅ Follow button clicked"); // debug
+      console.log("Follow button clicked"); 
       const token = await getToken();
       const { data } = await api.post(
         "/api/user/follow",
@@ -24,7 +24,7 @@ function UserCard({ user }) {
       );
       if (data.success) {
         toast.success(data.message);
-        dispatch(fetchUser(token)); // refresh current user state
+        dispatch(fetchUser(token)); 
       } else {
         toast.error(data.message);
       }
@@ -69,7 +69,7 @@ function UserCard({ user }) {
       </div>
 
       <div className="flex gap-3 mt-6">
-        {/* ✅ Follow Button wired */}
+        
         <button
           type="button"
           onClick={handleFollow}
@@ -82,7 +82,7 @@ function UserCard({ user }) {
           {alreadyFollowing ? "Following" : "Follow"}
         </button>
 
-        {/* Connect / Message */}
+        
         <button
           type="button"
           onClick={handleConnectionRequest}

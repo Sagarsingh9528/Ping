@@ -3,7 +3,7 @@ import imagekit from "../configs/imageKit.js";
 import Post from "../models/Post.js";
 import User from "../models/userModel.js";
 
-// Add post
+
 export const addPost = async (req, res) => {
   try {
     const { userId } = req.auth();
@@ -48,13 +48,13 @@ export const addPost = async (req, res) => {
   }
 };
 
-// Get Posts
+
 export const getFeedPosts = async (req, res) => {
     try {
         const {userId} = req.auth();
         const user = await User.findById(userId)
 
-        //user connection and followings
+        
         const userIds = [userId, ...user.connections, ...user.following]
         const posts = await Post.find({user: {$in: userIds}}).populate('user').sort({createdAt: -1});
 
@@ -66,7 +66,7 @@ export const getFeedPosts = async (req, res) => {
     }
 }
 
-// Like post
+
 export const likePost = async (req, res) => {
     try {
         const {userId} = req.auth();

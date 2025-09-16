@@ -215,7 +215,7 @@ const sendNotificationOfUnseenMessages = inngest.createFunction(
   }
 )
 
-// Export all Inngest functions
+
 export const functions = [
   syncUserCreation,
   syncUserUpdation,

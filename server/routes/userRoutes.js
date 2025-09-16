@@ -16,12 +16,12 @@ import { getUserRecentMessages } from "../controllers/messageController.js";
 
 const userRouter = express.Router();
 
-// ✅ Protect always comes before controller
+
 userRouter.get("/data", protect, getUserData);
 
 userRouter.post(
   "/update",
-  protect, // auth first
+  protect, 
   upload.fields([
     { name: "profile", maxCount: 1 },
     { name: "cover", maxCount: 1 },
