@@ -16,7 +16,11 @@ const app = express();
 await connectDB();
 
 // ✅ Core middlewares
-app.use(cors());
+app.use(cors({
+  origin: "https://ping-vshc-7bqrq7k6s-sagar-singhs-projects-c6959b24.vercel.app",
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // ✅ handles form-data text fields
 app.use(clerkMiddleware()); // Clerk auth
