@@ -127,7 +127,7 @@ function Connections() {
                 >
                   {/* Avatar */}
                   <img
-                    src={assets.sample_profile}
+                    src={user.profile_picture}
                     alt={user.name || "User"}
                     className="w-14 h-14 rounded-full object-cover"
                   />

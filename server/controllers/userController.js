@@ -5,18 +5,23 @@ import Post from "../models/Post.js";
 import User from "../models/userModel.js";
 import fs from "fs";
 
-
 async function findCurrentUser(clerkUserId) {
-  return User.findOne({ clerkId: clerkUserId }); 
+  // console.log(clerkUserId)
+  return User.findOne({ _id: clerkUserId });
+  
 }
 
-
+// ------------------- GET USER DATA -------------------
 export const getUserData = async (req, res) => {
+  console.log("abced")
   try {
-    const { userId } = req.auth; 
+    const { userId } = await req.auth(); // ✅ fixed
     const user = await findCurrentUser(userId);
+    console.log(user)
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found" });
+
     res.json({ success: true, user });
   } catch (error) {
     console.error(error);
@@ -24,18 +29,18 @@ export const getUserData = async (req, res) => {
   }
 };
 
-
+// ------------------- UPDATE USER -------------------
 export const updateUserData = async (req, res) => {
   try {
-    const { userId } = req.auth;
+    const { userId } = await req.auth(); // ✅ fixed
     let { username, bio, location, full_name } = req.body;
 
     const tempUser = await findCurrentUser(userId);
-    if (!tempUser) return res.status(404).json({ success: false, message: "User not found" });
+    if (!tempUser)
+      return res.status(404).json({ success: false, message: "User not found" });
 
     if (!username) username = tempUser.username;
 
-    
     if (tempUser.username !== username) {
       const existingUser = await User.findOne({ username });
       if (existingUser) username = tempUser.username;
@@ -43,7 +48,7 @@ export const updateUserData = async (req, res) => {
 
     const updatedData = { username, bio, location, full_name };
 
-    
+    // Profile picture
     if (req.files?.profile?.[0]) {
       const profile = req.files.profile[0];
       const buffer = fs.readFileSync(profile.path);
@@ -55,13 +60,17 @@ export const updateUserData = async (req, res) => {
 
       updatedData.profile_picture = imagekit.url({
         path: response.filePath,
-        transformation: [{ quality: "auto" }, { format: "webp" }, { width: "512" }],
+        transformation: [
+          { quality: "auto" },
+          { format: "webp" },
+          { width: "512" },
+        ],
       });
 
       fs.unlinkSync(profile.path);
     }
 
-    
+    // Cover photo
     if (req.files?.cover?.[0]) {
       const cover = req.files.cover[0];
       const buffer = fs.readFileSync(cover.path);
@@ -73,13 +82,19 @@ export const updateUserData = async (req, res) => {
 
       updatedData.cover_photo = imagekit.url({
         path: response.filePath,
-        transformation: [{ quality: "auto" }, { format: "webp" }, { width: "1280" }],
+        transformation: [
+          { quality: "auto" },
+          { format: "webp" },
+          { width: "1280" },
+        ],
       });
 
       fs.unlinkSync(cover.path);
     }
 
-    const user = await User.findByIdAndUpdate(tempUser._id, updatedData, { new: true });
+    const user = await User.findByIdAndUpdate(tempUser._id, updatedData, {
+      new: true,
+    });
     res.json({ success: true, user, message: "Profile updated successfully" });
   } catch (error) {
     console.error(error);
@@ -87,10 +102,10 @@ export const updateUserData = async (req, res) => {
   }
 };
 
-
+// ------------------- DISCOVER USERS -------------------
 export const discoverUsers = async (req, res) => {
   try {
-    const { userId } = req.auth;
+    const { userId } = await req.auth(); // ✅ fixed
     const { input } = req.body;
     const me = await findCurrentUser(userId);
 
@@ -111,11 +126,11 @@ export const discoverUsers = async (req, res) => {
   }
 };
 
-
+// ------------------- FOLLOW USER -------------------
 export const followUser = async (req, res) => {
   try {
-    const { userId } = req.auth;
-    const { id } = req.body; 
+    const { userId } = await req.auth(); // ✅ fixed
+    const { id } = req.body;
 
     const me = await findCurrentUser(userId);
     if (!me) return res.status(404).json({ success: false, message: "User not found" });
@@ -142,9 +157,10 @@ export const followUser = async (req, res) => {
   }
 };
 
+// ------------------- UNFOLLOW USER -------------------
 export const unfollowUser = async (req, res) => {
   try {
-    const { userId } = req.auth;
+    const { userId } = await req.auth(); // ✅ fixed
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -169,10 +185,10 @@ export const unfollowUser = async (req, res) => {
   }
 };
 
-
+// ------------------- CONNECTION REQUESTS -------------------
 export const sendConnectionRequest = async (req, res) => {
   try {
-    const { userId } = req.auth;
+    const { userId } = await req.auth(); // ✅ fixed
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -220,18 +236,19 @@ export const sendConnectionRequest = async (req, res) => {
   }
 };
 
-
+// ------------------- GET USER CONNECTIONS -------------------
 export const getUserConnections = async (req, res) => {
   try {
-    const { userId } = req.auth;
+    const { userId } = await req.auth(); // ✅ fixed
     const me = await findCurrentUser(userId);
     if (!me) return res.status(404).json({ success: false, message: "User not found" });
 
     const user = await User.findById(me._id).populate("connections followers following");
 
     const pendingConnections = (
-      await Connection.find({ to_user_id: me._id, status: "pending" })
-        .populate("from_user_id")
+      await Connection.find({ to_user_id: me._id, status: "pending" }).populate(
+        "from_user_id"
+      )
     ).map((connection) => connection.from_user_id);
 
     res.json({
@@ -247,10 +264,10 @@ export const getUserConnections = async (req, res) => {
   }
 };
 
-
+// ------------------- ACCEPT CONNECTION -------------------
 export const acceptConnectionRequest = async (req, res) => {
   try {
-    const { userId } = req.auth;
+    const { userId } = await req.auth(); // ✅ fixed
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -261,10 +278,12 @@ export const acceptConnectionRequest = async (req, res) => {
       to_user_id: me._id,
     });
 
-    if (!connection) return res.status(404).json({ success: false, message: "Connection not found" });
+    if (!connection)
+      return res.status(404).json({ success: false, message: "Connection not found" });
 
     const otherUser = await User.findById(id);
-    if (!otherUser) return res.status(404).json({ success: false, message: "Target user not found" });
+    if (!otherUser)
+      return res.status(404).json({ success: false, message: "Target user not found" });
 
     me.connections.push(id);
     await me.save();
@@ -282,7 +301,7 @@ export const acceptConnectionRequest = async (req, res) => {
   }
 };
 
-
+// ------------------- GET USER PROFILE -------------------
 export const getUserProfiles = async (req, res) => {
   try {
     const { profileId } = req.body;
