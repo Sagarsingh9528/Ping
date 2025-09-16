@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
@@ -9,22 +9,33 @@ import { MessageCircle, Plus, UserPlus } from "lucide-react";
 
 function UserCard({ user }) {
   const currentUser = useSelector((state) => state.user.value);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+
   const { getToken } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Sync local state with Redux
+  useEffect(() => {
+    setIsFollowing(currentUser?.following?.includes(user._id));
+    setIsConnected(currentUser?.connections?.includes(user._id));
+  }, [currentUser, user._id]);
+
   const handleFollow = async () => {
     try {
-      console.log("Follow button clicked"); 
+      console.log("Follow button clicked");
       const token = await getToken();
       const { data } = await api.post(
         "/api/user/follow",
         { id: user._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (data.success) {
         toast.success(data.message);
-        dispatch(fetchUser(token)); 
+        setIsFollowing(true); // immediate UI update
+        dispatch(fetchUser(token)); // update Redux state
       } else {
         toast.error(data.message);
       }
@@ -34,7 +45,7 @@ function UserCard({ user }) {
   };
 
   const handleConnectionRequest = async () => {
-    if (currentUser?.connections.includes(user._id)) {
+    if (isConnected) {
       return navigate("/messages/" + user._id);
     }
     try {
@@ -44,14 +55,16 @@ function UserCard({ user }) {
         { id: user._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      data.success ? toast.success(data.message) : toast.error(data.message);
+      if (data.success) {
+        toast.success(data.message);
+        setIsConnected(true); // immediate UI update
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
   };
-
-  const alreadyFollowing = currentUser?.following.includes(user._id);
-  const alreadyConnected = currentUser?.connections.includes(user._id);
 
   return (
     <div className="p-4 pt-6 flex flex-col justify-between w-72 shadow border border-gray-200 rounded-md bg-white relative z-10">
@@ -69,20 +82,18 @@ function UserCard({ user }) {
       </div>
 
       <div className="flex gap-3 mt-6">
-        
         <button
           type="button"
           onClick={handleFollow}
-          disabled={alreadyFollowing}
+          disabled={isFollowing}
           className="flex-1 py-2 px-3 bg-indigo-600 text-white rounded-md
                      hover:bg-indigo-700 flex items-center justify-center gap-1
                      disabled:opacity-60 active:scale-95 transition"
         >
           <UserPlus className="w-4 h-4" />
-          {alreadyFollowing ? "Following" : "Follow"}
+          {isFollowing ? "Following" : "Follow"}
         </button>
 
-        
         <button
           type="button"
           onClick={handleConnectionRequest}
@@ -90,12 +101,8 @@ function UserCard({ user }) {
                      hover:bg-gray-200 flex items-center justify-center gap-1
                      active:scale-95 transition"
         >
-          {alreadyConnected ? (
-            <MessageCircle className="w-5 h-5" />
-          ) : (
-            <Plus className="w-5 h-5" />
-          )}
-          {alreadyConnected ? "Message" : "Connect"}
+          {isConnected ? <MessageCircle className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+          {isConnected ? "Message" : "Connect"}
         </button>
       </div>
     </div>
