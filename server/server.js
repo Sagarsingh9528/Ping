@@ -17,7 +17,7 @@ await connectDB();
 
 // ✅ Core middlewares
 app.use(cors({
-  origin: "https://ping-vshc-7bqrq7k6s-sagar-singhs-projects-c6959b24.vercel.app",
+  origin: "https://ping-vshc.vercel.app",
   credentials: true
 }));
 
