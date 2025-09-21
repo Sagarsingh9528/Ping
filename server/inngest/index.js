@@ -1,20 +1,15 @@
 import { Inngest } from "inngest";
-import mongoose from "mongoose"; // ✅ default import
+import mongoose from "mongoose"; 
 import User from "../models/userModel.js";
 import Connection from "../models/connection.js";
 import sendEmail from "../configs/nodeMailer.js";
 import Story from "../models/Story.js";
 import Message from "../models/Message.js";
 
-// You can use mongoose.connection anywhere you need DB connection info:
-// const { connection } = mongoose;
 
-// Create Inngest client
 export const inngest = new Inngest({ id: "linkUp-app" });
 
-/**
- * Sync user creation from Clerk → MongoDB
- */
+
 const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
@@ -31,7 +26,7 @@ const syncUserCreation = inngest.createFunction(
       (email ? email.split("@")[0] : `user_${_id.slice(0, 8)}`);
     const profile_picture = data.profile_image_url || "";
 
-    // Ensure unique username
+    
     let finalUsername = username;
     const existingUser = await User.findOne({ username: finalUsername });
     if (existingUser) {
@@ -55,9 +50,7 @@ const syncUserCreation = inngest.createFunction(
   }
 );
 
-/**
- * Sync user update from Clerk → MongoDB
- */
+
 const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
   { event: "clerk/user.updated" },
@@ -86,9 +79,7 @@ const syncUserUpdation = inngest.createFunction(
   }
 );
 
-/**
- * Sync user deletion from Clerk → MongoDB
- */
+
 const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
   { event: "clerk/user.deleted" },
@@ -100,9 +91,7 @@ const syncUserDeletion = inngest.createFunction(
   }
 );
 
-/**
- * Send reminder when a new connection request is added
- */
+
 const sendNewConnectionRequestReminder = inngest.createFunction(
   { id: "send-new-connection-request-reminder" },
   { event: "app/connection-request" },
@@ -163,7 +152,7 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
   }
 );
 
-// Inngest function to delete Story after 24 hours
+
 const deleteStory = inngest.createFunction(
   {id: 'story-delete'},
   {event: 'app/story.delete'},
@@ -181,7 +170,7 @@ const deleteStory = inngest.createFunction(
 
 const sendNotificationOfUnseenMessages = inngest.createFunction(
   {id: "send-unseen-messages-notification"},
-  {cron: "TZ=America/New_York 0 9 * * *"}, //Every day 9 AM
+  {cron: "TZ=America/New_York 0 9 * * *"}, 
   async ({step}) => {
     const messages = await Message.find({seen: false}).populate('to_user_id');
     const unseenCount = {}

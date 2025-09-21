@@ -1,11 +1,11 @@
 export const protect = async (req, res, next) => {
     console.log("hello")
   try {
-    const { userId } = await req.auth(); // Clerk v5
+    const { userId } = await req.auth(); 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Not authenticated" });
     }
-    req.userId = userId; // attach userId for controllers
+    req.userId = userId;
     next();
   } catch (error) {
     console.error("Auth Error:", error);

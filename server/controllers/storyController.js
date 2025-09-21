@@ -47,13 +47,13 @@ export const addUserStory = async (req, res)=>{
     }
 }
 
-//getUser Stroy
+
 export const getStories = async (req, res)=>{
     try {
         const {userId} = req.auth();
         const user = await User.findById(userId)
         
-        // User connection and followings
+        
 
         const userIds = [userId, ...user.connections, ...user.following]
         const stories = await Story.find({

@@ -6,16 +6,16 @@ import User from "../models/userModel.js";
 import fs from "fs";
 
 async function findCurrentUser(clerkUserId) {
-  // console.log(clerkUserId)
+  
   return User.findOne({ _id: clerkUserId });
   
 }
 
-// ------------------- GET USER DATA -------------------
+
 export const getUserData = async (req, res) => {
   console.log("abced")
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     const user = await findCurrentUser(userId);
     console.log(user)
 
@@ -29,10 +29,10 @@ export const getUserData = async (req, res) => {
   }
 };
 
-// ------------------- UPDATE USER -------------------
+
 export const updateUserData = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     let { username, bio, location, full_name } = req.body;
 
     const tempUser = await findCurrentUser(userId);
@@ -48,7 +48,7 @@ export const updateUserData = async (req, res) => {
 
     const updatedData = { username, bio, location, full_name };
 
-    // Profile picture
+    
     if (req.files?.profile?.[0]) {
       const profile = req.files.profile[0];
       const buffer = fs.readFileSync(profile.path);
@@ -70,7 +70,7 @@ export const updateUserData = async (req, res) => {
       fs.unlinkSync(profile.path);
     }
 
-    // Cover photo
+    
     if (req.files?.cover?.[0]) {
       const cover = req.files.cover[0];
       const buffer = fs.readFileSync(cover.path);
@@ -102,7 +102,7 @@ export const updateUserData = async (req, res) => {
   }
 };
 
-// ------------------- DISCOVER USERS -------------------
+
 export const discoverUsers = async (req, res) => {
   try {
     const { userId } = await req.auth(); // ✅ fixed
@@ -126,10 +126,10 @@ export const discoverUsers = async (req, res) => {
   }
 };
 
-// ------------------- FOLLOW USER -------------------
+
 export const followUser = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -157,10 +157,10 @@ export const followUser = async (req, res) => {
   }
 };
 
-// ------------------- UNFOLLOW USER -------------------
+
 export const unfollowUser = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -185,10 +185,10 @@ export const unfollowUser = async (req, res) => {
   }
 };
 
-// ------------------- CONNECTION REQUESTS -------------------
+
 export const sendConnectionRequest = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -236,10 +236,10 @@ export const sendConnectionRequest = async (req, res) => {
   }
 };
 
-// ------------------- GET USER CONNECTIONS -------------------
+
 export const getUserConnections = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     const me = await findCurrentUser(userId);
     if (!me) return res.status(404).json({ success: false, message: "User not found" });
 
@@ -264,10 +264,10 @@ export const getUserConnections = async (req, res) => {
   }
 };
 
-// ------------------- ACCEPT CONNECTION -------------------
+
 export const acceptConnectionRequest = async (req, res) => {
   try {
-    const { userId } = await req.auth(); // ✅ fixed
+    const { userId } = await req.auth(); 
     const { id } = req.body;
 
     const me = await findCurrentUser(userId);
@@ -301,7 +301,7 @@ export const acceptConnectionRequest = async (req, res) => {
   }
 };
 
-// ------------------- GET USER PROFILE -------------------
+
 export const getUserProfiles = async (req, res) => {
   try {
     const { profileId } = req.body;
